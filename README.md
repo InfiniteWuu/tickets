@@ -2,6 +2,10 @@
 
 基于 **Tauri + Rust + Vue 3** 的多平台购票工作台，支持 **大麦 H5** 与 **Bilibili 会员购**。
 
+> 本项目是 [shiyutim/tickets](https://github.com/shiyutim/tickets) 的改进版本，沿用其 MIT 许可。相比原仓库新增：
+> - **Apple Silicon (ARM64) 原生 macOS 构建**：将 `tauri-plugin-sql` 改为本地 vendor 依赖以兼容新版 Cargo，产出原生 arm64 版（原仓库仅有 Intel 版，需 Rosetta 运行）。
+> - **大麦网扫码登录**：账号管理中可直接扫码自动获取 Cookie，无需手动复制。
+
 左侧切换平台，分别填写账号与活动信息。等待开售、购票重试与取消由 Rust 后端管理，切换页面不影响已启动的任务。
 
 本项目用于技术学习与交流，请合理使用，勿用于商业代抢。
@@ -15,7 +19,7 @@
 - **微信提醒**：在应用内扫码绑定微信 ClawBot，大麦与会员购创建订单成功或发现余票时直接发送提醒，支持查看连接状态、测试通知和解绑。
 - **自动校时**：优先请求淘宝公共时间接口，失败时使用 Bilibili 时间接口；多次采样选取往返耗时最小的结果，自动填写修正值并显示估计误差。
 - **订单处理**：凭证失效后重新准备订单；验证、限购、重复订单等情况停止并提示处理。下单响应无法确认时提示检查官方订单，避免盲目重试。
-- **统一账号**：按平台管理多个账号及 Cookie，设置默认账号；购票与监控共用，旧版已保存凭证自动迁入。
+- **统一账号**：按平台管理多个账号及 Cookie，设置默认账号；购票与监控共用，旧版已保存凭证自动迁入；大麦支持扫码登录自动获取 Cookie。
 - **记录与设置**：实时任务状态、成功提示音、SQLite 操作日志、按平台/日期/关键词筛选、导出、全局代理和运行标识。
 - **界面配色**：四套预设、浅色/深色模式，以及全局与 Bilibili 独立主色；即时预览，保存后自动恢复。
 - **订阅代理**：使用 `subscription-proxy-pool = "0.1.0"` 管理多个订阅、刷新节点、自动轮换或固定节点，兼容原有手动代理地址。
@@ -23,7 +27,7 @@
 
 ## 下载
 
-前往 [Releases](https://github.com/shiyutim/tickets/releases) 选择对应系统的安装包。新功能以当前源码为准，已发布安装包可能尚未包含。
+前往 [Releases](https://github.com/SolarisObserver/tickets/releases) 选择对应系统的安装包（含 Apple Silicon arm64 版）。新功能以当前源码为准，已发布安装包可能尚未包含。
 
 ## 本地运行
 
@@ -34,7 +38,7 @@ npm ci
 npm run tauri dev
 ```
 
-项目通过 `.cargo/config.toml` 使用 crates.io 官方 sparse 源，避免全局镜像缺少 `subscription-proxy-pool` 等依赖导致启动失败；无需修改本机全局 Cargo 配置。使用 pnpm 时也可执行 `pnpm run tauri dev`。
+项目通过 `.cargo/config.toml` 使用 crates.io 官方 sparse 源，避免全局镜像缺少 `subscription-proxy-pool` 等依赖导致启动失败；无需修改本机全局 Cargo 配置。国内网络下载慢时，可将 `.cargo/config.toml` 中 `[source.crates-io]` 的 `replace-with` 改为 `rsproxy` 并使用 `sparse+https://rsproxy.cn/index/`。使用 pnpm 时也可执行 `pnpm run tauri dev`。
 
 仅预览界面：
 
@@ -55,7 +59,7 @@ npm run tauri build
 
 ## 使用
 
-1. 在 **设置与帮助 → 账号与 Cookie** 中选择平台并添加账号。用浏览器登录对应平台，在活动页面的开发者工具 Network 中找到接口请求，复制 Request Headers 中的完整 Cookie。大麦使用 H5 页面，Cookie 需要包含 `_m_h5_tk`；Bilibili 需要包含 `SESSDATA` 和 `bili_jct`。
+1. 在 **设置与帮助 → 账号与 Cookie** 中选择平台并添加账号。大麦可点 **扫码登录（自动获取 Cookie）** 用大麦 App 扫码，自动填入 Cookie；也可用浏览器登录大麦 H5 页面，在开发者工具 Network 中复制请求的完整 Cookie（需包含 `_m_h5_tk`）。Bilibili 用浏览器登录后复制 Cookie，需包含 `SESSDATA` 和 `bili_jct`。
 2. 保存账号后回到大麦或 Bilibili 工作台，选择已保存账号，粘贴官方活动链接或直接填写项目编号，点击 **加载活动**。未指定账号时自动选用该平台默认账号。
 3. 选择场次与票档，再选择与购买张数一致的观演人。Bilibili 还需填写联系人、电话；需配送的票档选择收货地址。观演人与地址需预先在官方平台添加。
 4. 按需启用 **定时开始**。开售时间会自动带入，日期输入统一按**北京时间（UTC+8）**解释。
@@ -132,6 +136,7 @@ npm run tauri build
 
 ## 更新记录
 
+- 新增 Apple Silicon (ARM64) 原生构建支持与大麦网扫码登录（基于 shiyutim/tickets 改进）。
 - 新增自定义配色和深色模式，接入订阅代理管理，统一接口随机 UA，并使预约任务固定所选代理。
 - 新增 Bilibili 会员购，更新商品详情、订单准备与 `createV2` 链路，支持有效订单编号确认和官方支付入口。
 - 重做工作台界面，新增独立平台标签、任务记录页与设置帮助页。
@@ -140,4 +145,4 @@ npm run tauri build
 
 ## Star History
 
-[![Star History Chart](https://api.star-history.com/svg?repos=shiyutim/tickets&type=Date)](https://star-history.com/#shiyutim/tickets&Date)
+[![Star History Chart](https://api.star-history.com/svg?repos=SolarisObserver/tickets&type=Date)](https://star-history.com/#SolarisObserver/tickets&Date)

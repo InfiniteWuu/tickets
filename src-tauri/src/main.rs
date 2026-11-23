@@ -1,7 +1,7 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 use tauri::Manager;
-use tickets::{bilibili, clock, dm, notifications, subscriptions, tasks, utils, version};
+use tickets::{bilibili, clock, dm, dm_login, login, notifications, subscriptions, tasks, utils, version};
 
 fn main() {
     tauri::Builder::default()
@@ -27,6 +27,11 @@ fn main() {
             bilibili::bili_buyers,
             bilibili::bili_addresses,
             bilibili::bili_screens,
+            login::bili_qrcode_generate,
+            login::bili_qrcode_poll,
+            dm_login::dm_qrcode_generate,
+            dm_login::dm_qrcode_poll,
+            dm_login::dm_qrcode_exchange,
             tasks::start_ticket_task,
             notifications::test_wechat_notification,
             notifications::get_wechat_status,

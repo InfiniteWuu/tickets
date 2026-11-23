@@ -5,7 +5,9 @@ pub mod version;
 pub mod bilibili;
 pub mod clock;
 pub mod dm;
+pub mod dm_login;
 pub mod http;
+pub mod login;
 pub mod tasks;
 
 pub mod monitor;
